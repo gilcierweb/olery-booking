@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/olery_booking/input_helper.rb"
+
+puts 'Input Hotel'
+
+command = OleryBooking::InputHelper.gets.chomp
+
+puts command
