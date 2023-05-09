@@ -2,9 +2,8 @@
 # frozen_string_literal: true
 
 require_relative "../lib/olery_booking/input_helper.rb"
+require_relative "../lib/olery_booking/request.rb"
 
-puts 'Input Hotel'
+puts hotel = ARGV[0]
 
-command = OleryBooking::InputHelper.gets.chomp
-
-puts command
+OleryBooking::Request.new(hotel).run()

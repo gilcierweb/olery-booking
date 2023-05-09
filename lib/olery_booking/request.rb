@@ -1,8 +1,13 @@
+require 'uri'
+require 'json'
+require 'net/http'
+require 'watir'
+
 module OleryBooking
   class Request
 
-    def initialize(urls)
-      @urls = urls
+    def initialize(search)
+      @search = search
     end
 
     def call
@@ -10,25 +15,55 @@ module OleryBooking
     end
 
     def run
-      data_url = ['http://www.tripadvisor.com/Hotel_Review-g188590-d1946024-Reviews-DoubleTree_by_Hilton_Hotel_Amsterdam_Centraal_Station-Amsterdam_North_Holland_Province.html',
-                  'https://www.booking.com/hotel/nl/double-tree-by-hilton-ams terdam-centraal-station.en-gb.html',
-                  'https://www.holidaycheck.de/hi/doubletree-by-hilton-hotel-amsterdam-centraal-station/8a65ed71-2c3d-343d-9d39-9e8c0211'
-      ]
-      @urls.each do |url|
+      data_all = []
+      data_all.concat tripadvisor()
+      data_all.concat booking()
+      data_all.concat holidaycheck()
 
-      end
+      puts data_all.inspect
+      puts 'Search successfully performed'
     end
 
     def tripadvisor
-      get_booking(url)
+      data = []
+      browser = Watir::Browser.new
+      browser.goto "https://www.tripadvisor.com/Search?q=#{@search}"
+
+      button = browser.button(visible_text: /Search/)
+      button.text == 'Search' # => true
+      button.click
+      link = browser.link(class: 'review_count').href
+
+      browser.close
+
+      data << link.gsub('#REVIEWS', '')
+      data
     end
 
     def booking
-      get_booking(url)
+      data = []
+      browser = Watir::Browser.new
+      browser.goto "https://www.booking.com/searchresults.en-gb.html?ss=#{@search}"
+
+      link = browser.link(class: 'e13098a59f').href
+
+      browser.close
+
+      data << link
+      data
     end
 
     def holidaycheck
-      get_booking(url)
+      data = []
+      browser = Watir::Browser.new
+      browser.goto "https://www.holidaycheck.de/search-result/?q=#{@search}"
+
+      link = browser.link(class: 'list-item').href
+
+      browser.close
+
+      data << link
+      data
     end
 
     private
@@ -43,8 +78,9 @@ module OleryBooking
       request = Net::HTTP::Get.new(url)
 
       response = http.request(request)
-
-      return JSON.parse(response.read_body)
+      bookings = JSON.parse(response.read_body)
+      puts bookings.inspect
+      return bookings
     end
   end
 end
