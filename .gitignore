@@ -9,6 +9,8 @@
 
 # rspec failure tracking
 .rspec_status
+olery_booking-*
+
 
 # Editor directories and files
 .idea
