@@ -36,6 +36,8 @@ module OleryBooking
         f.write renderer.result binding
       end
 
+      File.open("#{__dir__}/log.txt", "w") { |f| f.write "#{data_all} \n" }
+
       puts 'Search successfully performed'
     end
 
@@ -47,11 +49,12 @@ module OleryBooking
       button = browser.button(visible_text: /Search/)
       button.text == 'Search' # => true
       button.click
+
+      name = browser.div(class: 'result-title').span.text
       link = browser.link(class: 'review_count').href
 
       browser.close
-
-      data << link.gsub('#REVIEWS', '')
+      data << { name: name, url: link.gsub('#REVIEWS', '') }
       data
     end
 
@@ -60,11 +63,13 @@ module OleryBooking
       browser = Watir::Browser.new
       browser.goto "https://www.booking.com/searchresults.en-gb.html?ss=#{@search}"
 
-      link = browser.link(class: 'e13098a59f').href
+      content = browser.link(class: 'e13098a59f')
+      link = content.href
+      name = content.div.text
 
       browser.close
 
-      data << link
+      data << { name: name, url: link }
       data
     end
 
@@ -73,11 +78,12 @@ module OleryBooking
       browser = Watir::Browser.new
       browser.goto "https://www.holidaycheck.de/search-result/?q=#{@search}"
 
+      name = browser.div.span(class: 'name').text
       link = browser.link(class: 'list-item').href
 
       browser.close
 
-      data << link
+      data << { name: name, url: link }
       data
     end
 
